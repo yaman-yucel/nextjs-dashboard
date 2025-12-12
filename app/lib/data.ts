@@ -9,24 +9,38 @@ import {
 } from './definitions';
 import { formatCurrency } from './utils';
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+// Check if POSTGRES_URL is set
+if (!process.env.POSTGRES_URL) {
+  console.error('POSTGRES_URL environment variable is not set!');
+}
+
+const sql = postgres(process.env.POSTGRES_URL!, { 
+  ssl: 'require',
+  connect_timeout: 20, // Increased timeout for long-distance connections
+  max: 10, // Connection pool size
+  idle_timeout: 30, // Close idle connections after 30 seconds
+});
 
 export async function fetchRevenue() {
   try {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
 
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.log('Fetching revenue data...');
 
     const data = await sql<Revenue[]>`SELECT * FROM revenue`;
 
-    // console.log('Data fetch completed after 3 seconds.');
+    //console.log('Revenue data:', data);
+    //console.log('Data fetch completed after 3 seconds.');
 
     return data;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch revenue data.');
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error code:', (error as any).code);
+    }
+    throw new Error(`Failed to fetch revenue data: ${error}`);
   }
 }
 
