@@ -1,9 +1,9 @@
-import { defineConfig } from 'eslint/config'
-import nextPlugin from 'eslint-config-next/core-web-vitals'
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
 
-export default defineConfig([
-  ...nextPlugin,
-  {
-    ignores: ['.next/**', 'node_modules/**'],
-  },
-])
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
+]);
+
+export default eslintConfig;
